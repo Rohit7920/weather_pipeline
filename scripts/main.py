@@ -46,3 +46,22 @@ merged_df = pd.merge(df, weather_df, on="City", how="inner")
 
 print(merged_df.shape)
 print(merged_df.head())
+
+print(merged_df.isna().sum())
+
+clean_df = merged_df.dropna(subset=["Temperature", "Windspeed", "Population"]).copy()
+
+clean_df["Population"] = clean_df["Population"].astype("int64")
+clean_df["Temperature"] = clean_df["Temperature"].astype("float64")
+
+clean_df["Temperature_F"] = clean_df["Temperature"] * 9 / 5 + 32
+
+clean_df["Temp_Category"] = pd.cut(
+    clean_df["Temperature"],
+    bins=[-float("inf"), 15, 28, float("inf")],
+    labels=["Cold", "Mild", "Hot"],
+).astype(str)
+
+print(clean_df.dtypes)
+print(clean_df.head(10))
+print(clean_df["Temp_Category"].value_counts())
