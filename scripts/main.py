@@ -39,3 +39,10 @@ for _, location in df.iterrows():
 print(f"Fetched {len(weather_records)} records")
 for record in weather_records[:5]:
     print(record)
+
+weather_df = pd.DataFrame(weather_records)
+
+merged_df = pd.merge(df, weather_df, on="City", how="inner")
+
+print(merged_df.shape)
+print(merged_df.head())
