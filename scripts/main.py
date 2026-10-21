@@ -2,6 +2,8 @@ import time
 
 import pandas as pd
 import requests
+from google.cloud import bigquery
+from google.oauth2 import service_account
 
 df = pd.read_csv("data/population.csv", thousands=",").head(50)
 
@@ -65,3 +67,17 @@ clean_df["Temp_Category"] = pd.cut(
 print(clean_df.dtypes)
 print(clean_df.head(10))
 print(clean_df["Temp_Category"].value_counts())
+
+project_id = "flowing-silo-512321-b6"
+table_id = f"{project_id}.global_weather_data.current_weather_stats"
+
+credentials = service_account.Credentials.from_service_account_file("scripts/gcp-key.json")
+client = bigquery.Client(credentials=credentials, project=project_id)
+
+job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+
+load_job = client.load_table_from_dataframe(clean_df, table_id, job_config=job_config)
+load_job.result()
+
+table = client.get_table(table_id)
+print(f"Loaded {table.num_rows} rows into {table_id}")
